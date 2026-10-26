@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>বাপের রাস্তা - Baper Rasta | 3D Dhaka Street Driving Game</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23e63946'/><text x='50%' y='60%' dominant-baseline='middle' text-anchor='middle' font-size='50'>🛺</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Galada&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/main.css">
+  <link rel="stylesheet" href="/src/styles/touch.css">
+</head>
+<body>
+  <!-- 3D Canvas -->
+  <div id="game-container">
+    <canvas id="webgl-canvas"></canvas>
+  </div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="screen-overlay">
+    <div class="loading-content">
+      <div class="rickshaw-loader">🛺💨</div>
+      <h1 class="bangla-title">বাপের রাস্তা</h1>
+      <p class="loading-text">ঢাকা শহরের জ্যাম এবং রাস্তা লোড হচ্ছে...</p>
+      <div class="progress-bar-wrap">
+        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+      </div>
+      <span id="loading-detail">গাড়ির ব্যাটারি চার্জ দেওয়া হচ্ছে...</span>
+    </div>
+  </div>
+
+  <!-- In-game HUD -->
+  <div id="hud" class="hud-container hidden">
+    <!-- Top Left: Score (জাতীয় ক্ষতি) -->
+    <div class="hud-card hud-score">
+      <div class="hud-label">জাতীয় ক্ষতি</div>
+      <div class="hud-score-display">
+        <span class="currency-sign">৳</span>
+        <span id="score-val" class="score-number">০</span>
+      </div>
+      <div id="damage-popup-container" class="damage-popup-container"></div>
+    </div>
+
+    <!-- Top Center: Alert Banner -->
+    <div id="alert-banner" class="alert-banner hidden">
+      <span class="alert-icon">⚠️</span>
+      <span id="alert-text">ভিআইপি গাড়ি ২৯১ মি দূরে</span>
+    </div>
+
+    <!-- Bengali Speech Bubble Container (Comic Dialogue Popups) -->
+    <div id="speech-bubble-container" class="speech-bubble-container hidden">
+      <div id="speech-bubble" class="comic-speech-bubble speaker-crowd">
+        <div id="speech-speaker" class="speech-speaker">🏃‍♂️ পাবলিক</div>
+        <div id="speech-text" class="speech-text">তোরে বহুত দিন ধইরা খুঁজতাছি, পাইছি তোরে!</div>
+      </div>
+    </div>
+
+    <!-- Top Right: Battery, Speed & Controls -->
+    <div class="hud-right-group">
+      <!-- Battery Meter -->
+      <div class="hud-card hud-battery">
+        <div class="battery-header">
+          <span class="battery-icon">⚡</span>
+          <span class="hud-label">চার্জ</span>
+          <span id="battery-val" class="battery-pct">১০০%</span>
+        </div>
+        <div class="battery-track">
+          <div id="battery-fill" class="battery-fill" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="hud-action-row">
+        <button id="btn-camera" class="hud-icon-btn" title="ক্যামেরা পরিবর্তন (C)">🎥</button>
+        <button id="btn-sound" class="hud-icon-btn" title="সাউন্ড অন/অফ (M)">🔊</button>
+        <button id="btn-dialogue" class="hud-icon-btn" title="বাংলা ভয়েস অন/অফ">🗣️</button>
+        <button id="btn-pause" class="hud-icon-btn" title="পজ করুন (Esc)">⏸️</button>
+      </div>
+
+      <!-- Speed Indicator -->
+      <div class="hud-card hud-speed">
+        <span id="speed-val" class="speed-num">০</span>
+        <span class="speed-unit">কিমি/ঘণ্টা</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Touch Controls -->
+  <div id="touch-controls" class="touch-controls-container hidden">
+    <!-- Steering Left / Right -->
+    <div class="touch-group touch-steer">
+      <button id="touch-left" class="touch-btn steer-btn" aria-label="বামে যান">◀</button>
+      <button id="touch-right" class="touch-btn steer-btn" aria-label="ডানে যান">▶</button>
+    </div>
+
+    <!-- Middle Horn Button -->
+    <div class="touch-group touch-center">
+      <button id="touch-horn" class="touch-btn horn-btn" aria-label="হর্ন">📢<span>হর্ন</span></button>
+    </div>
+
+    <!-- Drive Actions (Boost, Gas, Brake) -->
+    <div class="touch-group touch-actions">
+      <button id="touch-boost" class="touch-btn boost-btn" aria-label="টান">⚡<span>টান!</span></button>
+      <div class="pedal-group">
+        <button id="touch-brake" class="touch-btn brake-btn" aria-label="ব্রেক">🛑<span>ব্রেক</span></button>
+        <button id="touch-gas" class="touch-btn gas-btn" aria-label="চালান">🟢<span>চালান</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Menu Overlay -->
+  <div id="menu-overlay" class="screen-overlay">
+    <div class="menu-modal">
+      <div class="menu-decorations">
+        <span class="festoons">🌸 🏵️ 🌼 🌺 🏵️ 🌸</span>
+      </div>
+      <h1 class="game-logo">বাপের রাস্তা</h1>
+      <div class="game-logo-sub">BAPER RASTA</div>
+      <h2 class="game-tagline">রাস্তা কি আপনার বাপের?</h2>
+      <p class="game-motto">আপনার সন্তানকে টেসলা দিন: নো লাইসেন্স, নো ব্রেক।</p>
+
+      <div class="menu-actions">
+        <button id="btn-play" class="btn-primary-bangla">
+          <span class="btn-icon">🛺</span>
+          <span>রাস্তায় নামেন</span>
+        </button>
+      </div>
+
+      <!-- How to Play Card -->
+      <div class="guide-card">
+        <div class="guide-header">
+          <span>কীভাবে খেলবেন</span>
+          <span class="guide-decor">★ ★ ★</span>
+        </div>
+        <div class="guide-grid">
+          <div class="guide-item">
+            <span class="guide-icon">💥</span>
+            <div>
+              <strong>ধাক্কা দেন:</strong>
+              <p>গাড়ি, বাইক, দোকান: যত ভাঙবেন, তত জাতীয় ক্ষতি!</p>
+            </div>
+          </div>
+          <div class="guide-item">
+            <span class="guide-icon">🏃</span>
+            <div>
+              <strong>পাবলিক দৌড়াবে:</strong>
+              <p>হর্ন শুনে পথচারী ছুটবে, সাবধানে এড়িয়ে যান!</p>
+            </div>
+          </div>
+          <div class="guide-item">
+            <span class="guide-icon">🚌</span>
+            <div>
+              <strong>বাস-ট্রাক ছুঁলেই শেষ:</strong>
+              <p>বিহঙ্গ বা প্রজাপতি বাস দেখলে ১০০ হাত দূরে থাকুন!</p>
+            </div>
+          </div>
+          <div class="guide-item">
+            <span class="guide-icon">⚡</span>
+            <div>
+              <strong>চার্জ শেষ?:</strong>
+              <p>হলুদ ড্রেন পয়েন্টে থামেন অথবা ব্যাটারি পিকআপ নিন!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="keyboard-controls-hint">
+          <div class="key-pill"><span>W / ↑</span> চালান</div>
+          <div class="key-pill"><span>S / ↓</span> ব্রেক</div>
+          <div class="key-pill"><span>A / D</span> ডানে-বামে</div>
+          <div class="key-pill"><span>Shift</span> টান (বুস্ট)</div>
+          <div class="key-pill"><span>Space</span> হ্যান্ডব্রেক</div>
+          <div class="key-pill"><span>H</span> হর্ন</div>
+          <div class="key-pill"><span>C</span> ক্যামেরা</div>
+          <div class="key-pill"><span>M</span> সাউন্ড</div>
+        </div>
+      </div>
+
+      <!-- High Score Display in Menu -->
+      <div class="high-score-banner">
+        <span>সর্বোচ্চ জাতীয় ক্ষতি:</span>
+        <span id="menu-high-score" class="high-score-val">৳০</span>
+      </div>
+
+      <!-- Quality settings -->
+      <div class="quality-selector">
+        <span>গ্রাফিক্স:</span>
+        <button class="quality-btn" data-quality="low">লো</button>
+        <button class="quality-btn active" data-quality="medium">মিডিয়াম</button>
+        <button class="quality-btn" data-quality="high">হাই</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="game-over-modal" class="screen-overlay hidden">
+    <div class="menu-modal game-over-box">
+      <div class="police-siren">🚨 💥 🚨</div>
+      <h1 class="game-over-title">খেলা শেষ!</h1>
+      <p id="game-over-reason" class="game-over-reason">লোকাল বাসের সাথে সংঘর্ষে আপনার টমটম দুমড়ে-মুচড়ে গেছে!</p>
+
+      <div class="stats-panel">
+        <div class="stat-row highlight">
+          <span>মোট জাতীয় ক্ষতি:</span>
+          <span id="go-score" class="stat-val">৳০</span>
+        </div>
+        <div class="stat-row" id="go-penalty-row" style="color: #ff4d4d;">
+          <span>পথচারী ক্ষতিপূরণ জরিমানা:</span>
+          <span id="go-penalty" class="stat-val">৳০</span>
+        </div>
+        <div class="stat-row">
+          <span>গাড়ি ভাঙা হয়েছে:</span>
+          <span id="go-cars" class="stat-val">০ টি</span>
+        </div>
+        <div class="stat-row">
+          <span>চায়ের টং ও দোকান চূর্ণ:</span>
+          <span id="go-stalls" class="stat-val">০ টি</span>
+        </div>
+        <div class="stat-row">
+          <span>অতিক্রান্ত দূরত্ব:</span>
+          <span id="go-distance" class="stat-val">০ মিটার</span>
+        </div>
+        <div class="stat-row best">
+          <span>সর্বোচ্চ ক্ষতি (রেকর্ড):</span>
+          <span id="go-best" class="stat-val">৳০</span>
+        </div>
+      </div>
+
+      <div class="game-over-actions">
+        <button id="btn-restart" class="btn-primary-bangla restart-btn">
+          <span>🔄 আবার খেলুন</span>
+        </button>
+        <button id="btn-menu" class="btn-secondary-bangla">
+          <span>🏠 মেনুতে যান</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
