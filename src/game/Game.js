@@ -1,3 +1,4 @@
+import { StatsTracker } from '../utils/StatsTracker.js';
 import * as THREE from 'three';
 import { GameState } from './GameState.js';
 import { AudioManager } from './AudioManager.js';
@@ -17,6 +18,7 @@ export class Game {
   constructor() {
     this.canvas = document.getElementById('webgl-canvas');
     this.isPaused = false;
+    this.lastPoliceEncounterZ = 0;
 
     // 1. Initialize Core Three.js
     this.initThree();
@@ -39,7 +41,7 @@ export class Game {
     // 4. Build 3D World & Entities
     this.world = new World(this.scene);
     this.player = new PlayerVehicle(this.scene);
-    this.traffic = new TrafficManager(this.scene);
+    this.traffic = new TrafficManager(this.scene, this.world);
     this.cameraController = new CameraController(this.camera, this.player);
 
     // 5. Cartoon Comic Visual Effects & Crowd Pursuit Systems
@@ -65,10 +67,15 @@ export class Game {
       this.effects
     );
 
-    // Connect voice lines to visual speech bubble
-    this.audio.onDialogueCallback = (text, speaker) => {
-      this.hud.showSpeechBubble(text, speaker);
-    };
+    // Connect voice lines to visual speech bubble & auto-hide subtitles on audio end
+    this.audio.setDialogueCallbacks(
+      (text, speaker) => {
+        this.hud.showSpeechBubble(text, speaker);
+      },
+      () => {
+        this.hud.hideSpeechBubble();
+      }
+    );
 
     // 7. Setup Listeners
     this.initListeners();
@@ -136,10 +143,11 @@ export class Game {
   }
 
   startPlay() {
+    StatsTracker.recordRun();
     this.audio.unlock();
     this.audio.startEngine();
     this.gameState.reset();
-    this.player.reset(6.0, 0);
+    this.player.reset(10.0, 0);
     this.pursuit.reset();
     this.effects.clearAll();
     this.cameraController.reset();
@@ -147,9 +155,10 @@ export class Game {
   }
 
   restartPlay() {
+    StatsTracker.recordRun();
     this.audio.startEngine();
     this.gameState.reset();
-    this.player.reset(6.0, 0);
+    this.player.reset(10.0, 0);
     this.world.reset();
     this.traffic.reset(0);
     this.pursuit.reset();
@@ -161,7 +170,7 @@ export class Game {
   returnToMenu() {
     this.audio.stopEngine();
     this.gameState.state = 'MENU';
-    this.player.reset(6.0, 0);
+    this.player.reset(10.0, 0);
     this.world.reset();
     this.traffic.reset(0);
     this.pursuit.reset();
@@ -219,16 +228,24 @@ export class Game {
 
       // Update HUD
       this.hud.update(dt);
+
+      // Warning if player enters oncoming right-side traffic lanes
+      if (this.player.position.x < 2.0 && Math.abs(this.player.speed) > 3) {
+        if (!this.lastWrongWayWarn || Date.now() - this.lastWrongWayWarn > 4000) {
+          this.lastWrongWayWarn = Date.now();
+          this.hud?.showAlert('⚠️ আপনি উল্টো পথে (রং সাইডে) আছেন! বামে আসুন!');
+        }
+      }
     } else if (this.gameState.state === 'MENU') {
-      // Third-person perspective showing rickshaw and driver in lane
+      // Third-person perspective showing rickshaw on the left side of the avenue
       const time = Date.now() * 0.0006;
       const subtleSway = Math.sin(time) * 0.25;
       this.camera.position.set(
-        6.0 + subtleSway,
+        10.0 + subtleSway,
         3.8,
         -7.2
       );
-      this.camera.lookAt(6.0, 1.4, 15);
+      this.camera.lookAt(10.0, 1.4, 15);
     }
 
     this.renderer.render(this.scene, this.camera);

@@ -79,11 +79,11 @@ export class PursuitManager {
     // Slow vehicle slightly on initial collision
     this.player.speed *= 0.65;
 
-    // 2. Play pedestrian angry dialogue: “ওই মিয়া! দেইখা চালাইতে পারেন না?”
+    // 2. Play pedestrian angry dialogue: “অই মিয়া, দেইখা চালাইতে পারেন না?”
     if (this.dialogues) {
-      await this.dialogues.play('pedestrian_angry', 'ওই মিয়া! দেইখা চালাইতে পারেন না?', 'pedestrian');
+      await this.dialogues.play('pedestrian_angry', 'অই মিয়া, দেইখা চালাইতে পারেন না?', 'pedestrian');
     } else {
-      this.audio?.speakDialogue('ওই মিয়া! দেইখা চালাইতে পারেন না?', 'pedestrian', true);
+      this.audio?.speakDialogue('অই মিয়া, দেইখা চালাইতে পারেন না?', 'pedestrian', true);
       await this.sleep(2500);
     }
 
@@ -104,17 +104,12 @@ export class PursuitManager {
     this.player.isPanic = true;
 
     // Alert banner
-    this.hud?.showAlert('⚠️ পাবলিক ক্ষেপে গেছে! ধর ধর ধাওয়া শুরু!');
+    this.hud?.showAlert('⚠️ পাবলিক ক্ষেপে গেছে! ধাওয়া শুরু করেছে!');
 
     // Spawn crowd runners behind player
     this.spawnCrowdBehindPlayer();
 
-    // Play crowd reaction dialogue: “ধর শালারে! ধর!”
-    if (this.dialogues) {
-      await this.dialogues.play('crowd_catch_him', 'ধর শালারে! ধর!', 'crowd');
-    } else {
-      this.audio?.speakDialogue('ধর শালারে! ধর!', 'crowd', true);
-    }
+    // Crowd catch dialogue removed per request
   }
 
   /**
@@ -171,11 +166,11 @@ export class PursuitManager {
     // Set driver pleading pose (hands up, trembling head)
     this.player.setPleading(true);
 
-    // Play driver pleading dialogue: “ভাই, গরিব মানুষ, ছাইড়া দেন!”
+    // Play driver pleading dialogue: “ভাই, ছাইরা দেন গরিব মানুষ”
     if (this.dialogues) {
-      await this.dialogues.play('driver_pleading', 'ভাই, গরিব মানুষ, ছাইড়া দেন!', 'driver');
+      await this.dialogues.play('driver_pleading', 'ভাই, ছাইরা দেন গরিব মানুষ', 'driver');
     } else {
-      this.audio?.speakDialogue('ভাই, গরিব মানুষ, ছাইড়া দেন!', 'driver', true);
+      this.audio?.speakDialogue('ভাই, ছাইরা দেন গরিব মানুষ', 'driver', true);
       await this.sleep(2000);
     }
 

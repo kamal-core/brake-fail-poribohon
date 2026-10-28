@@ -29,6 +29,47 @@ export class CollisionSystem {
     this.checkVehicleCollisions();
     this.checkPedestrianCollisions();
     this.checkWorldPropCollisions();
+    this.checkStuntRamps();
+    this.checkProtestCollisions();
+  }
+
+  checkStuntRamps() {
+    if (!this.world.stuntRamps) return;
+    const pBox = this.player.box;
+    for (const ramp of this.world.stuntRamps) {
+      if (!ramp.hit && pBox.intersectsBox(ramp.box)) {
+        if (this.player.speed > 6.0) {
+          ramp.hit = true;
+          this.player.jump(ramp.jumpForce || 12.0);
+          this.gameState.addScore(1500, 'ঠেলাগাড়ি স্টান্ট জাম্প (আন্দোলন ওভারফ্লাই)!');
+          this.audio?.playBoost();
+          this.camera?.addTrauma(0.3);
+          this.effects?.spawnAccidentBurst(this.player.position);
+          this.audio?.speakDialogue('উইড়্যা গেলাম রে!', 'driver', true);
+        }
+      }
+    }
+  }
+
+  checkProtestCollisions() {
+    if (!this.world.protestBlockades) return;
+    const pBox = this.player.box;
+    for (const protest of this.world.protestBlockades) {
+      if (pBox.intersectsBox(protest.box)) {
+        // If airborne, player flies safely over the protest!
+        if (this.player.position.y > 1.35) {
+          continue;
+        }
+
+        // Hit blockade on ground
+        this.audio?.playCrash(1.5);
+        this.camera?.addTrauma(0.8);
+        this.player.speed = 0;
+        this.effects?.spawnAccidentBurst(this.player.position);
+        this.gameState.triggerGameOver('আন্দোলনের ব্যারিকেডে সরাসরি ধাক্কায় গাড়ি ধ্বংস ও গণধোলাই!');
+        return;
+      }
+    }
   }
 
   /**
@@ -97,10 +138,7 @@ export class CollisionSystem {
           );
           this.effects?.spawnAccidentBurst(impactPoint);
 
-          // Trigger accident event & crowd pursuit if high speed crash
-          if (impactSpeed > 8.0) {
-            this.triggerAccidentEvent('পিলারে দুর্ঘটনা!', impactPoint);
-          }
+          // Pillar hit: rebound and speed reduction, but NO game over
           break;
         }
       }
@@ -130,7 +168,7 @@ export class CollisionSystem {
         const contactPoint = new THREE.Vector3().addVectors(this.player.position, v.mesh.position).multiplyScalar(0.5);
         this.effects?.spawnAccidentBurst(contactPoint);
 
-        // Collision consequences
+        // Collision consequences: vehicle-only collision DOES NOT trigger pedestrian shouting
         if (v.type === 'bus' && this.player.speed > 17) {
           this.gameState.addScore(v.score, 'বিহঙ্গ বাসে সরাসরি ধাক্কা!');
           this.gameState.triggerGameOver('বিহঙ্গ বাসের সাথে মুখোমুখি সংঘর্ষে টমটম দুমড়ে-মুচড়ে গেছে!');
@@ -138,7 +176,6 @@ export class CollisionSystem {
         } else {
           const label = v.type === 'bus' ? 'লোকাল বাসে ধাক্কা!' : (v.type === 'cng' ? 'সিএনজি অটোতে ধাক্কা!' : 'প্রাইভেট কারে ধাক্কা!');
           this.gameState.addScore(v.score, label);
-          this.triggerAccidentEvent(label, contactPoint);
         }
       }
     }
@@ -192,8 +229,6 @@ export class CollisionSystem {
           this.player.speed *= 0.4;
           const contactPoint = prop.mesh ? prop.mesh.position.clone() : this.player.position.clone();
           this.effects?.spawnAccidentBurst(contactPoint);
-
-          this.triggerAccidentEvent('চায়ের টং ভেঙেছে!', contactPoint);
         } else if (prop.type === 'recharge') {
           prop.hit = true;
           this.gameState.rechargeBattery(100);

@@ -58,14 +58,6 @@ export class HUD {
     this.btnPause?.addEventListener('click', () => {
       this.gameState.notify('togglePause', true);
     });
-
-    // Random VIP / Road alerts every 25 seconds
-    setInterval(() => {
-      if (this.gameState.state === 'PLAYING') {
-        const alert = VIP_ALERTS[Math.floor(Math.random() * VIP_ALERTS.length)];
-        this.showAlert(alert);
-      }
-    }, 25000);
   }
 
   updateDialogueButtonState() {
@@ -174,6 +166,11 @@ export class HUD {
   showSpeechBubble(text, speaker = 'crowd') {
     if (!this.speechContainer || !this.speechBubble || !this.speechSpeaker || !this.speechText) return;
 
+    if (!text) {
+      this.hideSpeechBubble();
+      return;
+    }
+
     this.speechText.textContent = text;
     this.speechBubble.className = 'comic-speech-bubble';
 
@@ -183,6 +180,9 @@ export class HUD {
     } else if (speaker === 'crowd') {
       this.speechSpeaker.textContent = '🏃‍♂️ ক্ষুব্ধ পাবলিক (ধাওয়া):';
       this.speechBubble.classList.add('speaker-crowd');
+    } else if (speaker === 'police') {
+      this.speechSpeaker.textContent = '👮‍♂️ ট্রাফিক পুলিশ:';
+      this.speechBubble.classList.add('speaker-police');
     } else {
       this.speechSpeaker.textContent = '🚶 পথচারী:';
       this.speechBubble.classList.add('speaker-pedestrian');
@@ -193,7 +193,7 @@ export class HUD {
     clearTimeout(this.speechTimeout);
     this.speechTimeout = setTimeout(() => {
       this.hideSpeechBubble();
-    }, 2800);
+    }, 4500);
   }
 
   hideSpeechBubble() {

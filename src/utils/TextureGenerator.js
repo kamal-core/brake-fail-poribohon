@@ -39,7 +39,7 @@ export function createRickshawBackTexture() {
   ctx.shadowOffsetX = 3;
   ctx.shadowOffsetY = 3;
   ctx.shadowBlur = 6;
-  ctx.fillText('বাপের রাস্তা', canvas.width / 2, 70);
+  ctx.fillText('ব্রেকফেল পরিবহন', canvas.width / 2, 70);
   ctx.shadowColor = 'transparent';
 
   // Decorative heart / couple graphic or floral emblem in the middle
@@ -72,11 +72,11 @@ export function createRickshawBackTexture() {
   // Subtitle banner inside center oval
   ctx.font = 'bold 36px "Hind Siliguri", "Segoe UI", sans-serif';
   ctx.fillStyle = '#b30000';
-  ctx.fillText('★ সুপারহিট! ★', canvas.width / 2, 185);
+  ctx.fillText('ব্রেক নাই, বিপদের শেষ নাই!', canvas.width / 2, 185);
 
   ctx.font = 'bold 20px "Hind Siliguri", "Segoe UI", sans-serif';
   ctx.fillStyle = '#005500';
-  ctx.fillText('মায়ের দোয়া পরিবহন', canvas.width / 2, 225);
+  ctx.fillText('★ BRAKE FAIL PORIBOHON ★', canvas.width / 2, 225);
 
   // Bottom ornamental band with triangles/fringes
   const fringeY = 285;
@@ -373,56 +373,186 @@ export function createSidewalkTexture() {
 /**
  * Local bus livery texture (e.g. "বিহঙ্গ পরিবহন", "১০০ হাত দূরে থাকুন")
  */
-export function createBusLiveryTexture(busName = 'বিহঙ্গ পরিবহন') {
+export const DHAKA_BUS_COMPANIES = [
+  {
+    name: 'বলাকা পরিবহন',
+    english: 'BALAKA',
+    baseColor: '#f77f00', // Balaka orange
+    stripeColor: '#003049',
+    textColor: '#ffffff',
+    route: 'গাজীপুর ⇄ সায়েদাবাদ | সেবাই মূল লক্ষ্য'
+  },
+  {
+    name: 'আজমেরী পরিবহন',
+    english: 'AZMERI',
+    baseColor: '#1b4332', // Emerald green
+    stripeColor: '#ffd166',
+    textColor: '#ffffff',
+    route: 'চন্দ্রা ⇄ সদরঘাট | ১০০ হাত দূরে থাকুন'
+  },
+  {
+    name: 'প্রভাতী বনশ্রী পরিবহন',
+    english: 'PROVATI BANASREE',
+    baseColor: '#d90429', // Crimson red
+    stripeColor: '#f8f9fa',
+    textColor: '#ffffff',
+    route: 'গুলিস্তান ⇄ বনশ্রী ⇄ বাড্ডা'
+  },
+  {
+    name: 'বৈশাখী পরিবহন',
+    english: 'BOISHAKHI',
+    baseColor: '#0077b6', // Classic blue
+    stripeColor: '#ffb703',
+    textColor: '#ffffff',
+    route: 'মিরপুর ১৪ ⇄ নতুন বাজার | গতি সীমিত রাখুন'
+  },
+  {
+    name: 'বিহঙ্গ পরিবহন',
+    english: 'BIHANGA',
+    baseColor: '#03045e', // Deep royal navy
+    stripeColor: '#d90429',
+    textColor: '#ffffff',
+    route: 'মিরপুর ১২ ⇄ আজিমপুর | ঢাকা সিটি সার্ভিস'
+  }
+];
+
+export function createBusLiveryTexture(busConfig = DHAKA_BUS_COMPANIES[0]) {
+  if (typeof busConfig === 'string') {
+    const found = DHAKA_BUS_COMPANIES.find(b => b.name === busConfig);
+    busConfig = found || {
+      name: busConfig,
+      english: 'DHAKA',
+      baseColor: '#0077b6',
+      stripeColor: '#ffb703',
+      textColor: '#ffffff',
+      route: 'ঢাকা সিটি সার্ভিস | ১০০ হাত দূরে থাকুন'
+    };
+  }
+
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 256;
   const ctx = canvas.getContext('2d');
 
-  // Bus base color: vibrant cyan / blue
-  ctx.fillStyle = '#0077b6';
+  ctx.fillStyle = busConfig.baseColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Yellow and red racing stripes
-  ctx.fillStyle = '#ffb703';
-  ctx.fillRect(0, 90, canvas.width, 35);
-  ctx.fillStyle = '#d90429';
-  ctx.fillRect(0, 130, canvas.width, 25);
+  ctx.fillStyle = busConfig.stripeColor;
+  ctx.fillRect(0, 92, canvas.width, 36);
 
-  // Window band (black)
-  ctx.fillStyle = '#14213d';
-  ctx.fillRect(40, 20, canvas.width - 80, 50);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 132, canvas.width, 10);
 
-  // Window frames
-  ctx.strokeStyle = '#e0e1dd';
+  ctx.fillStyle = '#111827';
+  ctx.fillRect(35, 18, canvas.width - 70, 52);
+
+  ctx.strokeStyle = '#e5e7eb';
   ctx.lineWidth = 4;
-  for (let x = 40; x < canvas.width - 80; x += 65) {
-    ctx.strokeRect(x, 20, 60, 50);
+  for (let x = 35; x < canvas.width - 70; x += 65) {
+    ctx.strokeRect(x, 18, 60, 52);
   }
 
-  // Bus Name in Bengali
-  ctx.font = 'bold 38px "Hind Siliguri", sans-serif';
-  ctx.fillStyle = '#ffffff';
+  ctx.font = '900 36px "Hind Siliguri", sans-serif';
+  ctx.fillStyle = busConfig.textColor;
   ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowColor = 'rgba(0,0,0,0.85)';
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
-  ctx.fillText(busName, canvas.width / 2, 118);
+  ctx.shadowBlur = 4;
+  ctx.fillText(busConfig.name, canvas.width / 2, 120);
   ctx.shadowColor = 'transparent';
 
-  // Route & slogan
-  ctx.font = 'bold 20px "Hind Siliguri", sans-serif';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('মিরপুর ⇄ মতিঝিল | ১০০ হাত দূরে থাকুন', canvas.width / 2, 195);
+  ctx.font = 'bold 18px "Hind Siliguri", sans-serif';
+  ctx.fillStyle = '#f8f9fa';
+  ctx.fillText(busConfig.route, canvas.width / 2, 185);
+
+  ctx.font = '900 13px sans-serif';
+  ctx.fillStyle = '#e5e7eb';
+  ctx.fillText(busConfig.english + ' PORIBOHON LTD.', canvas.width / 2, 218);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
 
-/**
- * Battery recharge pickup zone marker ("ড্রেন লাইন চার্জিং পয়েন্ট")
- */
+export const DHAKA_JUNCTION_SIGNS = [
+  {
+    ahead: 'ফার্মগেট ↑',
+    right: 'শাহবাগ →',
+    left: '← কারওয়ান বাজার',
+    slogan: 'সড়ক নিরাপত্তা আইন মেনে চলুন'
+  },
+  {
+    ahead: 'মিরপুর ১০ ↑',
+    right: 'ধানমন্ডি →',
+    left: '← গুলিস্থান',
+    slogan: 'গতিসীমা ৩০ কিমি/ঘণ্টা'
+  },
+  {
+    ahead: 'মতিঝিল ↑',
+    right: 'পল্টন →',
+    left: '← মহাখালী',
+    slogan: 'ওভারটেকিং বিপজ্জনক'
+  },
+  {
+    ahead: 'মগবাজার ↑',
+    right: 'বাংলামোটর →',
+    left: '← যাত্রাবাড়ী',
+    slogan: 'জেব্রা ক্রসিংয়ে পথচারীকে পথ দিন'
+  },
+  {
+    ahead: 'বাড্ডা ↑',
+    right: 'রামপুরা →',
+    left: '← বিজয়নগর',
+    slogan: 'নিরাপদ সড়ক, সবার অধিকার'
+  }
+];
+
+export function createDhakaDirectionalSignTexture(signData = DHAKA_JUNCTION_SIGNS[0]) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#1b4332';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
+
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(24, 150);
+  ctx.lineTo(canvas.width - 24, 150);
+  ctx.stroke();
+
+  ctx.font = '900 40px "Hind Siliguri", sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  ctx.fillText(signData.ahead, canvas.width / 2, 70);
+
+  ctx.font = 'bold 27px "Hind Siliguri", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(signData.left, 36, 126);
+
+  ctx.textAlign = 'right';
+  ctx.fillText(signData.right, canvas.width - 36, 126);
+
+  ctx.shadowColor = 'transparent';
+  ctx.font = 'bold 18px "Hind Siliguri", sans-serif';
+  ctx.fillStyle = '#ffd166';
+  ctx.textAlign = 'center';
+  ctx.fillText(signData.slogan, canvas.width / 2, 204);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
 export function createRechargeMarkingTexture() {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
@@ -454,6 +584,41 @@ export function createRechargeMarkingTexture() {
   ctx.lineTo(135, 115);
   ctx.closePath();
   ctx.fill();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+
+/**
+ * Protest banner texture ("আমাদের দাবি মানতে হবে! রাস্তা অবরোধ!")
+ */
+export function createProtestBannerTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+
+  // Red background
+  ctx.fillStyle = '#b30000';
+  ctx.fillRect(0, 0, 512, 128);
+
+  // Border
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = '#ffd100';
+  ctx.strokeRect(4, 4, 504, 120);
+
+  // Text
+  ctx.font = 'bold 32px "Hind Siliguri", "Segoe UI", sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('দফা এক দাবি এক! রাস্তা বন্ধ!', 256, 42);
+
+  ctx.font = 'bold 24px "Hind Siliguri", "Segoe UI", sans-serif';
+  ctx.fillStyle = '#ffd100';
+  ctx.fillText('★ আমাদের দাবি মানতে হবে ★', 256, 88);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;

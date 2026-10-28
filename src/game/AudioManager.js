@@ -51,8 +51,64 @@ export class SoundManager {
   set onDialogueCallback(cb) {
     this._onDialogueCallback = cb;
     if (this.dialogues) {
-      this.dialogues.setOnDialogueCallback(cb);
+      this.dialogues.setOnDialogueCallback(cb, this._onDialogueEndCallback);
     }
+  }
+
+  setDialogueCallbacks(onStart, onEnd) {
+    this._onDialogueCallback = onStart;
+    this._onDialogueEndCallback = onEnd;
+    if (this.dialogues) {
+      this.dialogues.setOnDialogueCallback(onStart, onEnd);
+    }
+  }
+
+  /**
+   * Authentic piercing Dhaka traffic police whistle with pea rattle
+   */
+  playPoliceWhistle() {
+    this.unlock();
+    if (this.dialogues) {
+      this.dialogues.play('police_whistle', '👮‍♂️ ট্রাফিক পুলিশ: থামেন! গাড়ি থামান!', 'police');
+      return;
+    }
+    if (!this.ctx || !this.sfxGain) return;
+    const now = this.ctx.currentTime;
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const tremolo = this.ctx.createOscillator();
+    const tremoloGain = this.ctx.createGain();
+    const gain = this.ctx.createGain();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(2850, now);
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(3120, now);
+
+    tremolo.type = 'sine';
+    tremolo.frequency.setValueAtTime(18, now);
+    tremoloGain.gain.setValueAtTime(140, now);
+    tremolo.connect(tremoloGain);
+    tremoloGain.connect(osc1.frequency);
+    tremoloGain.connect(osc2.frequency);
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.05);
+    gain.gain.setValueAtTime(0.5, now + 0.6);
+    gain.gain.linearRampToValueAtTime(0, now + 0.7);
+    gain.gain.linearRampToValueAtTime(0.5, now + 0.85);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 1.6);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.sfxGain);
+
+    tremolo.start(now);
+    osc1.start(now);
+    osc2.start(now);
+    tremolo.stop(now + 1.65);
+    osc1.stop(now + 1.65);
+    osc2.stop(now + 1.65);
   }
 
   initSpeechSynth() {
@@ -131,68 +187,50 @@ export class SoundManager {
   }
 
   /**
-   * Authentic Bangladeshi battery auto-rickshaw (Tomtom / Easybike) sound generator
+   * Smooth, pleasant, realistic electric rickshaw hum (mellow, comforting, zero harsh buzz)
    */
   setupTomtomSynth() {
     if (!this.ctx) return;
 
-    // 1. Brushless DC Motor Inverter Whine (high triangle wave)
+    // 1. Warm low-frequency primary sine hum (85Hz at idle)
     this.motorOsc = this.ctx.createOscillator();
-    this.motorOsc.type = 'triangle';
-    this.motorOsc.frequency.setValueAtTime(140, this.ctx.currentTime);
+    this.motorOsc.type = 'sine';
+    this.motorOsc.frequency.setValueAtTime(85, this.ctx.currentTime);
 
-    // 2. Reduction Gearbox Whistle (sawtooth harmonic)
+    // 2. Soft sub-overtone triangle wave for gentle presence
     this.gearOsc = this.ctx.createOscillator();
-    this.gearOsc.type = 'sawtooth';
-    this.gearOsc.frequency.setValueAtTime(260, this.ctx.currentTime);
+    this.gearOsc.type = 'triangle';
+    this.gearOsc.frequency.setValueAtTime(170, this.ctx.currentTime);
 
-    // Filter to give that authentic metallic electric rickshaw timbre
+    // Gentle lowpass filter to keep all frequencies warm and smooth
     this.motorFilter = this.ctx.createBiquadFilter();
-    this.motorFilter.type = 'bandpass';
-    this.motorFilter.frequency.setValueAtTime(750, this.ctx.currentTime);
-    this.motorFilter.Q.setValueAtTime(2.2, this.ctx.currentTime);
+    this.motorFilter.type = 'lowpass';
+    this.motorFilter.frequency.setValueAtTime(280, this.ctx.currentTime);
+    this.motorFilter.Q.setValueAtTime(0.7, this.ctx.currentTime);
 
-    // Motor channel gain
+    // Engine channel gain (soft, comfortable volume)
     this.engineGain = this.ctx.createGain();
     this.engineGain.gain.setValueAtTime(0, this.ctx.currentTime);
 
+    // Soft sub-overtone gain
+    const subGain = this.ctx.createGain();
+    subGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+
     this.motorOsc.connect(this.motorFilter);
-    this.gearOsc.connect(this.motorFilter);
+    this.gearOsc.connect(subGain);
+    subGain.connect(this.motorFilter);
     this.motorFilter.connect(this.engineGain);
-
-    // 3. Chassis Rattle / Vibration (Noise loop)
-    const rattleBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 2, this.ctx.sampleRate);
-    const rattleData = rattleBuffer.getChannelData(0);
-    for (let i = 0; i < rattleData.length; i++) {
-      rattleData[i] = (Math.random() * 2 - 1) * 0.15;
-    }
-    this.rattleNode = this.ctx.createBufferSource();
-    this.rattleNode.buffer = rattleBuffer;
-    this.rattleNode.loop = true;
-
-    const rattleFilter = this.ctx.createBiquadFilter();
-    rattleFilter.type = 'lowpass';
-    rattleFilter.frequency.setValueAtTime(300, this.ctx.currentTime);
-
-    this.rattleGain = this.ctx.createGain();
-    this.rattleGain.gain.setValueAtTime(0, this.ctx.currentTime);
-
-    this.rattleNode.connect(rattleFilter);
-    rattleFilter.connect(this.rattleGain);
-    this.rattleGain.connect(this.engineGain);
-
     this.engineGain.connect(this.vehicleGain);
 
     this.motorOsc.start();
     this.gearOsc.start();
-    this.rattleNode.start();
   }
 
   startEngine() {
     this.unlock();
     if (!this.engineGain || !this.ctx) return;
     this.isEngineRunning = true;
-    this.engineGain.gain.setTargetAtTime(0.22, this.ctx.currentTime, 0.2);
+    this.engineGain.gain.setTargetAtTime(0.06, this.ctx.currentTime, 0.25);
   }
 
   stopEngine() {
@@ -206,26 +244,18 @@ export class SoundManager {
 
     const now = this.ctx.currentTime;
 
-    // Authentic easybike pitch: 140Hz at idle -> 520Hz at top speed (up to 700Hz on boost)
-    const motorFreq = 140 + speedRatio * 380 + (isBoosting ? 160 : 0);
-    const gearFreq = motorFreq * 1.85; // gearbox meshing tone
+    // Smooth gentle frequency curve: 85Hz (idle) -> 175Hz (cruise) -> 220Hz (boost)
+    const baseFreq = 85 + speedRatio * 90 + (isBoosting ? 45 : 0);
+    this.motorOsc.frequency.setTargetAtTime(baseFreq, now, 0.1);
+    this.gearOsc.frequency.setTargetAtTime(baseFreq * 2, now, 0.1);
 
-    this.motorOsc.frequency.setTargetAtTime(motorFreq, now, 0.08);
-    this.gearOsc.frequency.setTargetAtTime(gearFreq, now, 0.08);
+    // Gentle lowpass filter tracking (never harsh)
+    const filterFreq = 260 + speedRatio * 180 + (isBoosting ? 80 : 0);
+    this.motorFilter.frequency.setTargetAtTime(filterFreq, now, 0.1);
 
-    // Filter frequency tracking
-    const filterFreq = 650 + speedRatio * 1100 + (isBoosting ? 400 : 0);
-    this.motorFilter.frequency.setTargetAtTime(filterFreq, now, 0.08);
-
-    // Chassis rattle scales with speed
-    if (this.rattleGain) {
-      const rattleVol = Math.min(0.28, speedRatio * 0.25);
-      this.rattleGain.gain.setTargetAtTime(rattleVol, now, 0.1);
-    }
-
-    // Volume ducking during braking, louder on boost
-    const baseVol = isBraking ? 0.15 : (0.22 + speedRatio * 0.18 + (isBoosting ? 0.15 : 0));
-    this.engineGain.gain.setTargetAtTime(baseVol, now, 0.08);
+    // Smooth comfortable volume: 0.05 at idle, up to 0.13 at high speed
+    const targetVol = isBraking ? 0.03 : (0.05 + speedRatio * 0.07 + (isBoosting ? 0.04 : 0));
+    this.engineGain.gain.setTargetAtTime(targetVol, now, 0.1);
   }
 
   /**
@@ -283,8 +313,8 @@ export class SoundManager {
     whiteNoise.buffer = buffer;
 
     const noiseFilter = this.ctx.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(750, now);
+    noiseFilter.type = 'lowpass';
+    noiseFilter.frequency.setValueAtTime(420, now);
     noiseFilter.Q.setValueAtTime(1.8, now);
 
     const noiseGain = this.ctx.createGain();

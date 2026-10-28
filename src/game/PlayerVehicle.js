@@ -9,9 +9,11 @@ export class PlayerVehicle {
     this.mesh = new THREE.Group();
 
     // Physics parameters
-    this.position = new THREE.Vector3(6.0, 0, 0);
+    this.position = new THREE.Vector3(10.0, 0, 0);
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.speed = 0; // units/sec (1 unit ~= 1 meter)
+    this.verticalVelocity = 0;
+    this.isAirborne = false;
     this.maxSpeed = 22; // ~80 km/h
     this.maxReverseSpeed = -7;
     this.acceleration = 18;
@@ -43,6 +45,7 @@ export class PlayerVehicle {
     this.length = 2.8;
 
     this.buildModel();
+    this.mesh.position.copy(this.position);
     this.scene.add(this.mesh);
   }
 
@@ -373,6 +376,18 @@ export class PlayerVehicle {
     // Update position
     this.position.addScaledVector(this.velocity, dt);
 
+    // Vertical gravity and airborne jump physics (stunt jumps over protests!)
+    if (this.position.y > 0 || this.verticalVelocity > 0) {
+      this.isAirborne = true;
+      this.verticalVelocity -= 24.0 * dt; // Gravity
+      this.position.y += this.verticalVelocity * dt;
+      if (this.position.y <= 0) {
+        this.position.y = 0;
+        this.verticalVelocity = 0;
+        this.isAirborne = false;
+      }
+    }
+
     // Keep within road lateral boundaries
     this.position.x = THREE.MathUtils.clamp(this.position.x, -16.5, 16.5);
     this.mesh.position.copy(this.position);
@@ -419,9 +434,18 @@ export class PlayerVehicle {
     this.speed *= 0.35;
   }
 
-  reset(x = 6.0, z = 0) {
+  jump(force = 9.5) {
+    if (this.position.y <= 0.2) {
+      this.verticalVelocity = force;
+      this.isAirborne = true;
+    }
+  }
+
+  reset(x = 10.0, z = 0) {
     this.position.set(x, 0, z);
     this.velocity.set(0, 0, 0);
+    this.verticalVelocity = 0;
+    this.isAirborne = false;
     this.recoilVelocity.set(0, 0, 0);
     this.speed = 0;
     this.steerAngle = 0;

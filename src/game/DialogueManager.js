@@ -15,16 +15,11 @@ export class DialogueManager {
     this.dialogueDefs = {
       pedestrian_angry: {
         files: ['pedestrian_angry.wav', 'pedestrian_angry.mp3'],
-        text: 'ওই মিয়া! দেইখা চালাইতে পারেন না?',
+        text: 'অই মিয়া, দেইখা চালাইতে পারেন না?',
         speaker: 'pedestrian',
         estimatedDuration: 2.7
       },
-      crowd_catch_him: {
-        files: ['crowd_catch_him.wav', 'crowd_catch_him.mp3'],
-        text: 'ধর শালারে! ধর!',
-        speaker: 'crowd',
-        estimatedDuration: 1.5
-      },
+      
       slapstick_fight: {
         files: ['slapstick_fight.wav', 'slapstick_fight.mp3'],
         text: 'ধিসুম! ধাসুম! কিল! ফুঁসি! চিত-পটাং!',
@@ -33,9 +28,15 @@ export class DialogueManager {
       },
       driver_pleading: {
         files: ['driver_pleading.wav', 'driver_pleading.mp3'],
-        text: 'ভাই, গরিব মানুষ, ছাইড়া দেন!',
+        text: 'ভাই, ছাইরা দেন গরিব মানুষ',
         speaker: 'driver',
         estimatedDuration: 2.0
+      },
+      police_whistle: {
+        files: ['police_whistle.wav', 'police_whistle.mp3'],
+        text: '👮‍♂️ ট্রাফিক পুলিশ: এই গাড়ি সাইড কর! লাইসেন্স দেখা!',
+        speaker: 'police',
+        estimatedDuration: 1.8
       },
       crowd_found_you: {
         files: ['crowd_found_you.wav', 'crowd_found_you.mp3'],
@@ -60,8 +61,9 @@ export class DialogueManager {
   /**
    * Set callback for HUD speech bubble updates
    */
-  setOnDialogueCallback(cb) {
-    this.onDialogueStartCallback = cb;
+  setOnDialogueCallback(onStart, onEnd = null) {
+    this.onDialogueStartCallback = onStart;
+    this.onDialogueEndCallback = onEnd;
   }
 
   /**
@@ -93,6 +95,9 @@ export class DialogueManager {
         this.activeAudio.onerror = null;
       } catch (e) {}
       this.activeAudio = null;
+    }
+    if (this.onDialogueEndCallback) {
+      this.onDialogueEndCallback();
     }
   }
 

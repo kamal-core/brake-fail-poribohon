@@ -5,7 +5,10 @@ import {
   createSidewalkTexture,
   createMetroPosterTexture,
   createShopSignTexture,
-  createRechargeMarkingTexture
+  createRechargeMarkingTexture,
+  createProtestBannerTexture,
+  createDhakaDirectionalSignTexture,
+  DHAKA_JUNCTION_SIGNS
 } from '../utils/TextureGenerator.js';
 
 export class World {
@@ -14,13 +17,16 @@ export class World {
     this.chunks = [];
     this.chunkLength = 120;
     this.chunkCount = 5;
-    this.roadWidth = 26; // Total road width
-    this.sidewalkWidth = 6;
-    this.medianWidth = 3.6;
+    this.roadWidth = 36; // Spacious multi-lane Dhaka avenue (was 26)
+    this.sidewalkWidth = 7.0; // Wide pedestrian footpath
+    this.medianWidth = 4.0; // Central median with Metro pillars
 
     // Obstacles and interactive items for collision
     this.collidables = []; // stalls, carts, charging stations
     this.solidObstacles = []; // Solid pillars, buildings, hard boundaries
+    this.zebraCrossings = []; // Designated pedestrian zebra crossings
+    this.stuntRamps = []; // Thela Gari stunt jump ramps
+    this.protestBlockades = []; // Street protest rallies / roadblocks
 
     // Shared materials & textures
     this.initSharedResources();
@@ -30,7 +36,7 @@ export class World {
 
     // Create Initial Chunks
     for (let i = 0; i < this.chunkCount; i++) {
-      const chunk = this.createChunk(i * this.chunkLength);
+      const chunk = this.createChunk(i * this.chunkLength, i);
       this.chunks.push(chunk);
       this.scene.add(chunk.group);
     }
@@ -65,6 +71,21 @@ export class World {
       map: this.roadTexture,
       roughness: 0.85,
       metalness: 0.1
+    });
+
+    this.zebraMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff
+    });
+
+    this.protestBannerTexture = createProtestBannerTexture();
+    this.protestBannerMat = new THREE.MeshBasicMaterial({
+      map: this.protestBannerTexture,
+      side: THREE.DoubleSide
+    });
+
+    this.woodMat = new THREE.MeshStandardMaterial({
+      color: 0x6f4e37,
+      roughness: 0.8
     });
 
     this.curbMat = new THREE.MeshStandardMaterial({
@@ -130,7 +151,7 @@ export class World {
     this.sunLight = sunLight;
   }
 
-  createChunk(startZ) {
+  createChunk(startZ, chunkIndex = 0) {
     const group = new THREE.Group();
     group.position.z = startZ;
 
@@ -175,6 +196,15 @@ export class World {
 
     // 7. Roadside details: Tea Stalls (টং দোকান) & Charging Stations
     this.addRoadsideProps(group, chunkLength);
+
+    // 8. Zebra Crossings (জেব্রা ক্রসিং)
+    this.addZebraCrossings(group, chunkLength, startZ);
+
+    // 9. Street Protest Event (আন্দোলন) & Thela Gari Stunt Ramp
+    this.addProtestEventAndRamp(group, chunkLength, startZ, chunkIndex);
+
+    // 10. Dhaka Highway & Intersection Directional Road Signs
+    this.addDirectionalRoadSigns(group, chunkLength, startZ, chunkIndex);
 
     return {
       group,
@@ -417,7 +447,7 @@ export class World {
 
     // 1. Roadside Tea Stall (টং দোকান)
     const stallZ = length * 0.35;
-    const stallX = -roadHalf - 2.8;
+    const stallX = -roadHalf - 3.5;
 
     const stallGroup = new THREE.Group();
     stallGroup.position.set(stallX, 0, stallZ);
@@ -465,7 +495,7 @@ export class World {
 
     // 2. Battery Recharge Zone ("ড্রেন লাইন চার্জিং পয়েন্ট")
     const chargeZ = length * 0.75;
-    const chargeX = roadHalf - 3.2; // In right-most lane
+    const chargeX = 14.5; // In left slow lane
 
     const chargeGeo = new THREE.PlaneGeometry(3.6, 5.0);
     const chargeMat = new THREE.MeshBasicMaterial({
@@ -491,6 +521,251 @@ export class World {
       mesh: chargeMarking,
       hit: false
     });
+  }
+
+  /**
+   * Adds painted white Zebra Crossings across the roadway
+   */
+  addZebraCrossings(group, length, startZ) {
+    const zebraOffsets = [35, 95];
+    const stripeWidth = 0.65;
+    const stripeLength = 4.4;
+    const stripeGap = 0.55;
+
+    zebraOffsets.forEach(localZ => {
+      const crossingGroup = new THREE.Group();
+      crossingGroup.position.set(0, 0.02, localZ);
+
+      // Left carriageway stripes (from x = -12.5 to -2.5)
+      for (let x = -17.5; x <= -2.5; x += (stripeWidth + stripeGap)) {
+        const sGeo = new THREE.PlaneGeometry(stripeWidth, stripeLength);
+        const stripe = new THREE.Mesh(sGeo, this.zebraMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(x, 0, 0);
+        crossingGroup.add(stripe);
+      }
+
+      // Right carriageway stripes (from x = 2.5 to 12.5)
+      for (let x = 2.5; x <= 17.5; x += (stripeWidth + stripeGap)) {
+        const sGeo = new THREE.PlaneGeometry(stripeWidth, stripeLength);
+        const stripe = new THREE.Mesh(sGeo, this.zebraMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(x, 0, 0);
+        crossingGroup.add(stripe);
+      }
+
+      group.add(crossingGroup);
+
+      // Register zebra crossing zone
+      this.zebraCrossings.push({
+        chunkGroup: group,
+        localZ,
+        z: startZ + localZ,
+        zMin: startZ + localZ - 2.5,
+        zMax: startZ + localZ + 2.5,
+        xMin: -13.0,
+        xMax: 13.0
+      });
+    });
+  }
+
+  /**
+   * Street Protest Blockade (আন্দোলন) & Angled Thela Gari Stunt Jump Ramp!
+   */
+  addProtestEventAndRamp(group, length, startZ, chunkIndex) {
+    // Spawn protest event on alternate chunks
+    if (chunkIndex % 2 !== 1) return;
+
+    const protestZ = 75;
+    const rampZ = 52; // 23 meters before protest blockade
+
+    // --- A. THELA GARI (ঠেলাগাড়ি) STUNT RAMP ---
+    // Placed in player's main left driving lane (x = -6.5)
+    const rampGroup = new THREE.Group();
+    rampGroup.position.set(10.0, 0, rampZ);
+
+    // Tilted wooden ramp deck (tilted upward by ~18 degrees)
+    const deckGeo = new THREE.BoxGeometry(2.5, 0.12, 4.2);
+    const deck = new THREE.Mesh(deckGeo, this.woodMat);
+    deck.position.set(0, 0.55, 0);
+    deck.rotation.x = 0.32; // Incline ramp upward along +Z
+    deck.castShadow = true;
+    rampGroup.add(deck);
+
+    // Wooden frame support legs
+    const legGeo = new THREE.BoxGeometry(0.12, 1.1, 0.12);
+    const legL = new THREE.Mesh(legGeo, this.woodMat);
+    legL.position.set(-1.15, 0.55, 1.8);
+    const legR = legL.clone();
+    legR.position.set(1.15, 0.55, 1.8);
+    rampGroup.add(legL);
+    rampGroup.add(legR);
+
+    // Two wooden spoked wheels on sides of the cart
+    const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.15, 12);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x3d2817, roughness: 0.9 });
+    const wheelL = new THREE.Mesh(wheelGeo, wheelMat);
+    wheelL.rotation.z = Math.PI / 2;
+    wheelL.position.set(-1.32, 0.5, 1.5);
+    const wheelR = wheelL.clone();
+    wheelR.position.set(1.32, 0.5, 1.5);
+    rampGroup.add(wheelL);
+    rampGroup.add(wheelR);
+
+    // Push handles at the rear
+    const handleGeo = new THREE.BoxGeometry(0.1, 0.1, 1.2);
+    const handleL = new THREE.Mesh(handleGeo, this.woodMat);
+    handleL.position.set(-0.9, 0.25, -2.4);
+    const handleR = handleL.clone();
+    handleR.position.set(0.9, 0.25, -2.4);
+    rampGroup.add(handleL);
+    rampGroup.add(handleR);
+
+    group.add(rampGroup);
+
+    // Register stunt ramp collider
+    const rampCollider = {
+      type: 'stunt_ramp',
+      name: 'ঠেলাগাড়ি র‍্যাম্প',
+      x: 10.0,
+      localZ: rampZ,
+      chunkGroup: group,
+      width: 2.8,
+      depth: 4.4,
+      height: 1.2,
+      jumpForce: 12.0,
+      hit: false,
+      box: new THREE.Box3()
+    };
+    rampCollider.box.setFromCenterAndSize(
+      new THREE.Vector3(10.0, 0.6, startZ + rampZ),
+      new THREE.Vector3(2.8, 1.2, 4.4)
+    );
+    this.stuntRamps.push(rampCollider);
+
+    // --- B. PROTEST ROADBLOCK (রাস্তা অবরোধ ও আন্দোলন) ---
+    const protestGroup = new THREE.Group();
+    protestGroup.position.set(0, 0, protestZ);
+
+    // Red banner strung across lanes: "দফা এক দাবি এক! রাস্তা বন্ধ!"
+    const bannerGeo = new THREE.PlaneGeometry(24, 1.6);
+    const banner = new THREE.Mesh(bannerGeo, this.protestBannerMat);
+    banner.position.set(-2.0, 2.0, 0);
+    banner.castShadow = true;
+    protestGroup.add(banner);
+
+    // Banner support tripods / poles
+    const poleMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    const bPoleL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.2), poleMat);
+    bPoleL.position.set(-15.2, 1.6, 0);
+    const bPoleR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.2), poleMat);
+    bPoleR.position.set(11.2, 1.6, 0);
+    protestGroup.add(bPoleL);
+    protestGroup.add(bPoleR);
+
+    // Demonstrators holding placards across roadway
+    const protestorPositions = [-14.0, -11.5, -9.0, -6.5, -4.0, 4.0, 6.5, 9.0, 11.5, 14.0];
+    const demonstratorMat = new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.8 });
+    const placardMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+
+    protestorPositions.forEach((posX, idx) => {
+      const pGroup = new THREE.Group();
+      pGroup.position.set(posX, 0, (idx % 2 === 0 ? 0.4 : -0.4));
+
+      // Demonstrator body
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 1.6), demonstratorMat);
+      body.position.y = 0.8;
+      pGroup.add(body);
+
+      // Placard stick & board
+      const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.4), poleMat);
+      stick.position.set(0.2, 1.5, 0.1);
+      pGroup.add(stick);
+
+      const signBoard = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.6), placardMat);
+      signBoard.position.set(0.2, 2.1, 0.12);
+      pGroup.add(signBoard);
+
+      protestGroup.add(pGroup);
+    });
+
+    group.add(protestGroup);
+
+    // Register protest hazard collider (lynch / arrest if hit on ground)
+    const protestCollider = {
+      type: 'protest_blockade',
+      name: 'আন্দোলনের ব্যারিকেড',
+      localZ: protestZ,
+      chunkGroup: group,
+      width: 28.0,
+      depth: 2.8,
+      height: 2.6,
+      box: new THREE.Box3()
+    };
+    protestCollider.box.setFromCenterAndSize(
+      new THREE.Vector3(-2.0, 1.3, startZ + protestZ),
+      new THREE.Vector3(28.0, 2.6, 2.8)
+    );
+    this.protestBlockades.push(protestCollider);
+  }
+
+
+  /**
+   * Roadside Highway & Intersection Directional Signs for Dhaka Locations (Placed strictly on the sidewalk roadside)
+   */
+  addDirectionalRoadSigns(group, length, startZ, chunkIndex) {
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x495057, metalness: 0.7, roughness: 0.4 });
+    const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, 4.8, 10);
+    const boardGeo = new THREE.PlaneGeometry(4.6, 2.3);
+    const frameGeo = new THREE.BoxGeometry(4.7, 2.4, 0.08);
+
+    // 1. First Roadside Sign: On the sidewalk curb (x = 19.2, z = 38)
+    const signZ1 = 38;
+    const signGroup1 = new THREE.Group();
+    signGroup1.position.set(19.2, 0, signZ1);
+
+    const pole1 = new THREE.Mesh(poleGeo, steelMat);
+    pole1.position.y = 2.4;
+    signGroup1.add(pole1);
+
+    const signData1 = DHAKA_JUNCTION_SIGNS[chunkIndex % DHAKA_JUNCTION_SIGNS.length];
+    const signTexture1 = createDhakaDirectionalSignTexture(signData1);
+    const signMat1 = new THREE.MeshBasicMaterial({ map: signTexture1, side: THREE.DoubleSide });
+
+    const board1 = new THREE.Mesh(boardGeo, signMat1);
+    board1.position.set(0, 3.4, 0);
+    board1.rotation.y = Math.PI; // Faces oncoming player driving along +Z
+    signGroup1.add(board1);
+
+    const frame1 = new THREE.Mesh(frameGeo, steelMat);
+    frame1.position.set(0, 3.4, 0.04);
+    signGroup1.add(frame1);
+
+    group.add(signGroup1);
+
+    // 2. Second Roadside Sign: Further down on the sidewalk curb (x = 19.2, z = 92)
+    const signZ2 = 92;
+    const signGroup2 = new THREE.Group();
+    signGroup2.position.set(19.2, 0, signZ2);
+
+    const pole2 = new THREE.Mesh(poleGeo, steelMat);
+    pole2.position.y = 2.4;
+    signGroup2.add(pole2);
+
+    const signData2 = DHAKA_JUNCTION_SIGNS[(chunkIndex + 1) % DHAKA_JUNCTION_SIGNS.length];
+    const signTexture2 = createDhakaDirectionalSignTexture(signData2);
+    const signMat2 = new THREE.MeshBasicMaterial({ map: signTexture2, side: THREE.DoubleSide });
+
+    const board2 = new THREE.Mesh(boardGeo, signMat2);
+    board2.position.set(0, 3.4, 0);
+    board2.rotation.y = Math.PI;
+    signGroup2.add(board2);
+
+    const frame2 = new THREE.Mesh(frameGeo, steelMat);
+    frame2.position.set(0, 3.4, 0.04);
+    signGroup2.add(frame2);
+
+    group.add(signGroup2);
   }
 
   update(playerZ) {
@@ -531,6 +806,30 @@ export class World {
             so.box.translate(new THREE.Vector3(0, 0, deltaZ));
           }
         });
+
+        // Reposition zebra crossings
+        this.zebraCrossings.forEach(zc => {
+          if (zc.chunkGroup === chunk.group) {
+            zc.z += deltaZ;
+            zc.zMin += deltaZ;
+            zc.zMax += deltaZ;
+          }
+        });
+
+        // Reposition stunt ramps
+        this.stuntRamps.forEach(sr => {
+          if (sr.chunkGroup === chunk.group) {
+            sr.box.translate(new THREE.Vector3(0, 0, deltaZ));
+            sr.hit = false;
+          }
+        });
+
+        // Reposition protest blockades
+        this.protestBlockades.forEach(pb => {
+          if (pb.chunkGroup === chunk.group) {
+            pb.box.translate(new THREE.Vector3(0, 0, deltaZ));
+          }
+        });
       }
     });
   }
@@ -548,6 +847,27 @@ export class World {
       so.box.setFromCenterAndSize(
         new THREE.Vector3(so.x, 4.0, z),
         new THREE.Vector3(so.width, so.height, so.depth)
+      );
+    });
+    this.zebraCrossings.forEach(zc => {
+      const z = zc.chunkGroup.position.z + zc.localZ;
+      zc.z = z;
+      zc.zMin = z - 2.5;
+      zc.zMax = z + 2.5;
+    });
+    this.stuntRamps.forEach(sr => {
+      sr.hit = false;
+      const z = sr.chunkGroup.position.z + sr.localZ;
+      sr.box.setFromCenterAndSize(
+        new THREE.Vector3(-10.0, 0.6, z),
+        new THREE.Vector3(sr.width, sr.height, sr.depth)
+      );
+    });
+    this.protestBlockades.forEach(pb => {
+      const z = pb.chunkGroup.position.z + pb.localZ;
+      pb.box.setFromCenterAndSize(
+        new THREE.Vector3(-2.0, 1.3, z),
+        new THREE.Vector3(pb.width, pb.height, pb.depth)
       );
     });
   }

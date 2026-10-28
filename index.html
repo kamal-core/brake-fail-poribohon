@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>বাপের রাস্তা - Baper Rasta | 3D Dhaka Street Driving Game</title>
+  <title>ব্রেকফেল পরিবহন - Brake Fail Poribohon | 3D Dhaka Street Driving Game</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23e63946'/><text x='50%' y='60%' dominant-baseline='middle' text-anchor='middle' font-size='50'>🛺</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Galada&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Galada&family=Hind+Siliguri:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles/main.css">
   <link rel="stylesheet" href="/src/styles/touch.css">
 </head>
@@ -21,8 +21,9 @@
   <div id="loading-screen" class="screen-overlay">
     <div class="loading-content">
       <div class="rickshaw-loader">🛺💨</div>
-      <h1 class="bangla-title">বাপের রাস্তা</h1>
-      <p class="loading-text">ঢাকা শহরের জ্যাম এবং রাস্তা লোড হচ্ছে...</p>
+      <h1 class="bangla-title">ব্রেকফেল পরিবহন</h1>
+      <div class="english-brand-sub">BRAKE FAIL PORIBOHON</div>
+      <p class="loading-text">ব্রেক নাই, বিপদের শেষ নাই! ঢাকার জ্যাম ও রাস্তা লোড হচ্ছে...</p>
       <div class="progress-bar-wrap">
         <div id="progress-bar-fill" class="progress-bar-fill"></div>
       </div>
@@ -48,11 +49,11 @@
       <span id="alert-text">ভিআইপি গাড়ি ২৯১ মি দূরে</span>
     </div>
 
-    <!-- Bengali Speech Bubble Container (Comic Dialogue Popups) -->
+    <!-- Bengali Speech Bubble Container (Only visible during active dialogue audio) -->
     <div id="speech-bubble-container" class="speech-bubble-container hidden">
       <div id="speech-bubble" class="comic-speech-bubble speaker-crowd">
-        <div id="speech-speaker" class="speech-speaker">🏃‍♂️ পাবলিক</div>
-        <div id="speech-text" class="speech-text">তোরে বহুত দিন ধইরা খুঁজতাছি, পাইছি তোরে!</div>
+        <div id="speech-speaker" class="speech-speaker">🚶 পথচারী:</div>
+        <div id="speech-text" class="speech-text">অই মিয়া, দেইখা চালাইতে পারেন না?</div>
       </div>
     </div>
 
@@ -109,94 +110,311 @@
     </div>
   </div>
 
-  <!-- Start Menu Overlay -->
-  <div id="menu-overlay" class="screen-overlay">
-    <div class="menu-modal">
-      <div class="menu-decorations">
-        <span class="festoons">🌸 🏵️ 🌼 🌺 🏵️ 🌸</span>
-      </div>
-      <h1 class="game-logo">বাপের রাস্তা</h1>
-      <div class="game-logo-sub">BAPER RASTA</div>
-      <h2 class="game-tagline">রাস্তা কি আপনার বাপের?</h2>
-      <p class="game-motto">আপনার সন্তানকে টেসলা দিন: নো লাইসেন্স, নো ব্রেক।</p>
+  <!-- HOME PAGE / START MENU OVERLAY (Directly Matching User Reference Image 1) -->
+  <div id="menu-overlay" class="screen-overlay home-screen-overlay">
+    <div class="home-layout-container">
+      
+      <!-- Top Left Branding & Big Yellow CTA Button -->
+      <div class="home-top-section">
+        <div class="home-logo-box">
+          <div class="logo-text-wrapper">
+            <h1 class="home-main-logo">ব্রেকফেল<br><span class="highlight-title">পরিবহন</span></h1>
+            <div class="home-english-brand">BRAKE FAIL PORIBOHON</div>
+          </div>
+          <div class="home-tagline-badge">
+            <span>ব্রেক নাই, বিপদের শেষ নাই!</span>
+          </div>
+        </div>
 
-      <div class="menu-actions">
-        <button id="btn-play" class="btn-primary-bangla">
-          <span class="btn-icon">🛺</span>
-          <span>রাস্তায় নামেন</span>
+        <!-- Big Yellow Hero Action Button -->
+        <button id="btn-play" class="btn-hero-start">
+          <span class="hero-play-icon">🛺</span>
+          <span class="hero-play-text">রাস্তায় নামেন</span>
         </button>
       </div>
 
-      <!-- How to Play Card -->
-      <div class="guide-card">
-        <div class="guide-header">
-          <span>কীভাবে খেলবেন</span>
-          <span class="guide-decor">★ ★ ★</span>
+      <!-- Center-Bottom: Sleek Two-Column Rules Card -->
+      <div class="rules-card-container">
+        <div class="rules-card-header">
+          <span class="rules-header-icon">🎮</span>
+          <span class="rules-header-title">খেলার নিয়ম</span>
+          <span class="rules-header-stars">★ ★ ★</span>
         </div>
-        <div class="guide-grid">
-          <div class="guide-item">
-            <span class="guide-icon">💥</span>
-            <div>
-              <strong>ধাক্কা দেন:</strong>
-              <p>গাড়ি, বাইক, দোকান: যত ভাঙবেন, তত জাতীয় ক্ষতি!</p>
+
+        <div class="rules-columns-grid">
+          <!-- Left Column: Keyboard Controls -->
+          <div class="rules-col rules-controls-col">
+            <div class="rule-row">
+              <span class="key-combo">W S D</span>
+              <span class="rule-desc">রিকশা চালান</span>
+            </div>
+            <div class="rule-row">
+              <span class="key-combo">⬅ ➡</span>
+              <span class="rule-desc">দিক পরিবর্তন</span>
+            </div>
+            <div class="rule-row">
+              <span class="key-combo">Space</span>
+              <span class="rule-desc">ব্রেক / হ্যান্ড ব্রেক</span>
+            </div>
+            <div class="rule-row">
+              <span class="key-combo">C</span>
+              <span class="rule-desc">ক্যামেরা পরিবর্তন</span>
+            </div>
+            <div class="rule-row">
+              <span class="key-combo">H</span>
+              <span class="rule-desc">হর্ন দিন</span>
             </div>
           </div>
-          <div class="guide-item">
-            <span class="guide-icon">🏃</span>
-            <div>
-              <strong>পাবলিক দৌড়াবে:</strong>
-              <p>হর্ন শুনে পথচারী ছুটবে, সাবধানে এড়িয়ে যান!</p>
+
+          <!-- Right Column: Driving Rules & Warnings -->
+          <div class="rules-col rules-tips-col">
+            <div class="rule-row">
+              <span class="rule-icon">🚶</span>
+              <span class="rule-desc">পথচারীকে ধাক্কা দেবেন না</span>
             </div>
-          </div>
-          <div class="guide-item">
-            <span class="guide-icon">🚌</span>
-            <div>
-              <strong>বাস-ট্রাক ছুঁলেই শেষ:</strong>
-              <p>বিহঙ্গ বা প্রজাপতি বাস দেখলে ১০০ হাত দূরে থাকুন!</p>
+            <div class="rule-row">
+              <span class="rule-icon">🚗</span>
+              <span class="rule-desc">গাড়ির সাথে ধাক্কায় বিপদ!</span>
             </div>
-          </div>
-          <div class="guide-item">
-            <span class="guide-icon">⚡</span>
-            <div>
-              <strong>চার্জ শেষ?:</strong>
-              <p>হলুদ ড্রেন পয়েন্টে থামেন অথবা ব্যাটারি পিকআপ নিন!</p>
+            <div class="rule-row">
+              <span class="rule-icon">👮</span>
+              <span class="rule-desc">পুলিশ দেখলে সাবধান!</span>
+            </div>
+            <div class="rule-row">
+              <span class="rule-icon">👥</span>
+              <span class="rule-desc">জনতার সাথে ঝামেলা এড়ান</span>
+            </div>
+            <div class="rule-row">
+              <span class="rule-icon">⭐</span>
+              <span class="rule-desc">নিরাপদে চালিয়ে বেশি দূর যান</span>
             </div>
           </div>
         </div>
 
-        <div class="keyboard-controls-hint">
-          <div class="key-pill"><span>W / ↑</span> চালান</div>
-          <div class="key-pill"><span>S / ↓</span> ব্রেক</div>
-          <div class="key-pill"><span>A / D</span> ডানে-বামে</div>
-          <div class="key-pill"><span>Shift</span> টান (বুস্ট)</div>
-          <div class="key-pill"><span>Space</span> হ্যান্ডব্রেক</div>
-          <div class="key-pill"><span>H</span> হর্ন</div>
-          <div class="key-pill"><span>C</span> ক্যামেরা</div>
-          <div class="key-pill"><span>M</span> সাউন্ড</div>
+        <!-- Bottom Actions Row inside Rules Card -->
+        <div class="rules-card-bottom-bar">
+          <div class="creator-mini-credit">
+            <div class="creator-mini-avatar"></div>
+            <span class="creator-mini-text">Made by <strong>Kamal Ahmed</strong></span>
+          </div>
+
+          <div class="rules-card-pills">
+            <a href="https://www.facebook.com/kamalmostakin" target="_blank" rel="noopener" class="pill-btn fb-pill">
+              <span class="pill-icon">📘</span> ফেসবুক
+            </a>
+            <a href="https://github.com/kamal-core/" target="_blank" rel="noopener" class="pill-btn portfolio-pill">
+              <span class="pill-icon">💻</span> পোর্টফোলিও
+            </a>
+            <button id="btn-about" class="pill-btn about-pill">
+              <span class="pill-icon">ℹ️</span> আমাদের সম্পর্কে
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- High Score Display in Menu -->
-      <div class="high-score-banner">
-        <span>সর্বোচ্চ জাতীয় ক্ষতি:</span>
-        <span id="menu-high-score" class="high-score-val">৳০</span>
+      <!-- Discreet Floating Disclaimer Button on the Right Side of Home Screen -->
+      <div class="disclaimer-float-wrapper">
+        <button id="btn-open-disclaimer" class="btn-disclaimer-float" title="গেমের ডিসক্লেইমার পড়ুন">
+          <span class="disclaimer-icon">📜</span>
+          <span>ডিসক্লেইমার</span>
+        </button>
       </div>
 
-      <!-- Quality settings -->
-      <div class="quality-selector">
-        <span>গ্রাফিক্স:</span>
-        <button class="quality-btn" data-quality="low">লো</button>
-        <button class="quality-btn active" data-quality="medium">মিডিয়াম</button>
-        <button class="quality-btn" data-quality="high">হাই</button>
+    </div>
+  </div>
+
+  <!-- ABOUT US / আমাদের সম্পর্কে OVERLAY (Directly Matching User Reference Image 2) -->
+  <div id="about-overlay" class="screen-overlay about-screen-overlay hidden">
+    <div class="about-page-container">
+      
+      <!-- Top Navigation Bar (Matching Reference Screenshot 2) -->
+      
+
+      <!-- Main Parchment Content Card (Matching Reference Screenshot 2) -->
+      <div class="about-parchment-card">
+        <!-- Kamal Ahmed Profile Header with Crown Doodle -->
+        <div class="about-profile-section">
+          <div class="about-avatar-wrapper">
+            <div class="about-avatar-photo"></div>
+          </div>
+          <h2 class="about-developer-name">Kamal Ahmed</h2>
+          <div class="about-made-by">Made by <strong>Kamal Ahmed</strong></div>
+          <p class="about-bio-text">ঢাকা শহরের একজন সৃষ্টিশীল গেম ডেভেলপার। বাংলাদেশি সংস্কৃতি, শহুরে ট্রাফিক ও কমেডি গেম তৈরিতে নিবেদিত।</p>
+          <div class="about-motto-pill">
+            <span>ব্রেক নাই, বিপদের শেষ নাই! 🙂</span>
+          </div>
+        </div>
+
+        <!-- 3 Statistics Badges Grid -->
+        <div class="about-stats-row">
+          <div class="about-stat-card card-players">
+            <div class="stat-badge-icon">👥</div>
+            <div class="stat-badge-data">
+              <span id="stat-players-num" class="stat-badge-number">342K</span>
+              <span class="stat-badge-label">Players</span>
+            </div>
+          </div>
+
+          <div class="about-stat-card card-runs">
+            <div class="stat-badge-icon">🎮</div>
+            <div class="stat-badge-data">
+              <span id="stat-runs-num" class="stat-badge-number">2.1M</span>
+              <span class="stat-badge-label">Runs Played</span>
+            </div>
+          </div>
+
+          <div class="about-stat-card card-hours">
+            <div class="stat-badge-icon">🕒</div>
+            <div class="stat-badge-data">
+              <span id="stat-hours-num" class="stat-badge-number">51,000+</span>
+              <span class="stat-badge-label">Hours Played</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-stats-note">⚡ লাইভ ট্র্যাকার — প্রতিটি রান ও খেলার সময়ের সাথে স্বয়ংক্রিয়ভাবে আপডেট হয়।</div>
+
+        <!-- Contact Section -->
+        <div class="about-contact-section">
+          <div class="contact-header-wrap">
+            <span class="contact-header-icon">✉️</span>
+            <span class="contact-header-title">যোগাযোগ</span>
+          </div>
+          <p class="contact-sub-text">ব্র্যান্ড সহযোগিতা, ইন-গেম প্লেসমেন্ট বা নতুন আইডিয়ার জন্য যোগাযোগ করুন।</p>
+
+          <div class="about-contact-buttons-row">
+            <a href="mailto:kamalahmed1984@gmail.com" class="about-contact-btn email-btn">
+              <span class="btn-icon">✉️</span> Email Me
+            </a>
+            <a href="https://www.facebook.com/kamalmostakin" target="_blank" rel="noopener" class="about-contact-btn fb-btn">
+              <span class="btn-icon">📘</span> Facebook DM
+            </a>
+            <a href="https://github.com/kamal-core/" target="_blank" rel="noopener" class="about-contact-btn portfolio-btn">
+              <span class="btn-icon">💻</span> Portfolio
+            </a>
+          </div>
+        </div>
+
+        <!-- Back to Game Button -->
+        <div class="about-back-btn-wrap">
+          <button id="btn-back-from-about" class="btn-back-to-game">
+            <span>⬅ গেমে ফিরে যান</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DISCLAIMER MODAL (Exact User Provided Bengali & English Text) -->
+  <div id="disclaimer-modal" class="screen-overlay hidden">
+    <div class="menu-modal disclaimer-modal-box">
+      <div class="disclaimer-modal-header">
+        <h2>📜 ডিসক্লেইমার — ব্রেকফেল পরিবহন</h2>
+        <button id="btn-close-disclaimer" class="btn-close-modal" aria-label="বন্ধ করুন">✖</button>
+      </div>
+
+      <div class="disclaimer-scroll-content">
+        <div class="disclaimer-tagline-banner">
+          <strong>ব্রেকফেল পরিবহন (Brake Fail Poribohon)</strong><br>
+          একটি কাল্পনিক, ব্যঙ্গাত্মক ও বিনোদনমূলক গেম।
+        </div>
+
+        <section class="disclaimer-section-bn">
+          <h3>১. এটি একটি কাল্পনিক গেম</h3>
+          <p>ব্রেকফেল পরিবহন একটি হাস্যরসাত্মক গেম, যেখানে বাংলাদেশের শহুরে যানজট, ট্রাফিক বিশৃঙ্খলা এবং দৈনন্দিন জীবনের নানা পরিস্থিতিকে অতিরঞ্জিতভাবে উপস্থাপন করা হয়েছে। গেমের সব চরিত্র, সংলাপ ও ঘটনাপ্রবাহ কাল্পনিক। বাস্তব কোনো ব্যক্তি, প্রতিষ্ঠান বা ঘটনার সঙ্গে মিল পাওয়া গেলে তা অনিচ্ছাকৃত ও কাকতালীয়।</p>
+
+          <h3>২. কোনো রাজনৈতিক পক্ষের সমর্থনে নয়</h3>
+          <p>এই গেম কোনো রাজনৈতিক দল, নেতা বা মতাদর্শের পক্ষে কিংবা বিপক্ষে প্রচারণা চালানোর উদ্দেশ্যে তৈরি নয়। গেমের ব্যঙ্গ ও হাস্যরস মূলত যানজট, সড়কের বিশৃঙ্খলা এবং আমাদের দৈনন্দিন সামাজিক ও অর্থনৈতিক অভিজ্ঞতাকে কেন্দ্র করে।</p>
+
+          <h3>৩. গেমের ঘটনা বাস্তবে অনুকরণ করবেন না</h3>
+          <p>গেমে দেখানো বিপজ্জনক ড্রাইভিং, ভুল পথে গাড়ি চালানো, ইচ্ছাকৃত সংঘর্ষ, ঝুঁকিপূর্ণ ওভারটেক, ব্যারিকেড টপকে লাফ দেওয়া কিংবা অর্থের বিনিময়ে জরিমানা বা মামলা এড়ানোর মতো কোনো ঘটনাই বাস্তবে অনুকরণ করবেন না।<br>
+          সড়কে ট্রাফিক আইন মেনে চলুন, নিরাপদ দূরত্ব বজায় রাখুন এবং নিজের ও অন্যের জীবনের নিরাপত্তাকে সর্বোচ্চ গুরুত্ব দিন।</p>
+
+          <h3>৪. সহিংসতার বিরুদ্ধে অবস্থান</h3>
+          <p>গেমে দেখানো জনতার উত্তেজনা, ধাওয়া বা মারধরের দৃশ্য কেবল কাল্পনিক বিনোদন ও ব্যঙ্গের অংশ। এগুলো বাস্তব সহিংসতা, গণপিটুনি বা আইন নিজের হাতে তুলে নেওয়ার সমর্থন নয়।<br>
+          কেউ অপরাধ করলে তার বিচার আইন অনুযায়ী হওয়া উচিত। আইন সবার জন্য সমানভাবে প্রযোজ্য হওয়া জরুরি।</p>
+
+          <h3>৫. অটোরিকশা চালক ও অন্যান্য সড়ক ব্যবহারকারী</h3>
+          <p>এই গেম কোনো নির্দিষ্ট পেশার মানুষকে হেয় করার উদ্দেশ্যে তৈরি নয়। অটোরিকশা চালক, বাসচালক, পথচারী, যাত্রী এবং অন্যান্য সড়ক ব্যবহারকারী—সবাই নিরাপদ সড়ক ও সুষ্ঠু ট্রাফিক ব্যবস্থার অধিকারী।<br>
+          আমাদের লক্ষ্য হলো উন্নত যানবাহন প্রযুক্তি, দায়িত্বশীল চালনা, কার্যকর ট্রাফিক ব্যবস্থাপনা এবং সবার জন্য নিরাপদ সড়কের গুরুত্ব তুলে ধরা।</p>
+
+          <h3>৬. গেমের সীমাবদ্ধতা ও দায়বদ্ধতা</h3>
+          <p>এই গেমটি বিনোদনের উদ্দেশ্যে তৈরি। গেমের যানবাহন চলাচল, পদার্থবিজ্ঞানের আচরণ, সংঘর্ষ এবং অন্যান্য পরিস্থিতি বাস্তব জীবনের সঠিক প্রতিরূপ নয়। গেমের ফলাফল বা অভিজ্ঞতার ভিত্তিতে বাস্তব যানবাহন চালনা কিংবা নিরাপত্তা সম্পর্কে সিদ্ধান্ত নেবেন না।</p>
+
+          <h3>৭. স্বাস্থ্য সতর্কতা</h3>
+          <p>গেমে ঝলকানো আলো, দ্রুত দৃশ্য পরিবর্তন, হঠাৎ জোরে শব্দ এবং স্ক্রিন কাঁপানোর মতো প্রভাব থাকতে পারে।<br>
+          আপনার যদি ঝলকানো আলোতে খিঁচুনি হওয়ার প্রবণতা বা এপিলেপসি থাকে, তাহলে সতর্কতার সঙ্গে খেলুন। চোখে অস্বস্তি, মাথা ঘোরা বা অসুস্থ বোধ করলে সঙ্গে সঙ্গে খেলা বন্ধ করুন। দীর্ঘ সময় খেললে নিয়মিত বিরতি নিন।</p>
+
+          <h3>৮. যোগাযোগ ও মতামত</h3>
+          <p>গেম সম্পর্কে কোনো মতামত, পরামর্শ, বাগ রিপোর্ট বা সহযোগিতার প্রস্তাব থাকলে নির্মাতার সঙ্গে যোগাযোগ করতে পারেন।<br>
+          <strong>নির্মাতা:</strong> Kamal Ahmed<br>
+          <strong>ইমেইল:</strong> <a href="mailto:kamalahmed1984@gmail.com">kamalahmed1984@gmail.com</a><br>
+          <strong>Facebook:</strong> <a href="https://www.facebook.com/kamalmostakin" target="_blank" rel="noopener">https://www.facebook.com/kamalmostakin</a><br>
+          <strong>Portfolio:</strong> <a href="https://github.com/kamal-core/" target="_blank" rel="noopener">https://github.com/kamal-core/</a></p>
+        </section>
+
+        <hr class="disclaimer-divider">
+
+        <section class="disclaimer-section-en">
+          <h2>English Disclaimer</h2>
+          
+          <h3>A Satirical Game</h3>
+          <p>Brake Fail Poribohon is a fictional, humorous game inspired by urban traffic, road disorder, and everyday social experiences in Bangladesh. All characters, dialogue, and events are fictional. Any resemblance to actual people, organizations, or events is coincidental.</p>
+
+          <h3>No Political Affiliation</h3>
+          <p>The game is not intended to support or oppose any political party, leader, or ideology. Its satire focuses on traffic chaos and everyday social and economic challenges.</p>
+
+          <h3>Do Not Recreate In-Game Actions</h3>
+          <p>Dangerous driving, wrong-way driving, deliberate collisions, reckless overtaking, jumping over barricades, or attempting to avoid penalties through payments are fictional gameplay elements. Never imitate these actions in real life. Follow traffic laws and prioritize everyone's safety.</p>
+
+          <h3>Violence and Mob Justice</h3>
+          <p>Crowd confrontations and violence shown in the game are fictional satirical elements, not an endorsement of assault, mob justice, or taking the law into one's own hands. Alleged wrongdoing should be addressed through lawful and fair processes.</p>
+
+          <h3>Road Users and Safety</h3>
+          <p>The game is not intended to demean auto-rickshaw drivers or any other road users. Everyone deserves safer roads, responsible driving, better vehicle technology, and fair traffic enforcement.</p>
+
+          <h3>Game Limitations</h3>
+          <p>The game's driving mechanics, collisions, physics, and scenarios are simplified fictional representations. They should not be treated as accurate simulations or used as guidance for real-world driving decisions.</p>
+
+          <h3>Health Warning</h3>
+          <p>The game may contain flashing lights, rapid visual changes, sudden loud sounds, and screen-shake effects. If you are sensitive to flashing lights or have photosensitive epilepsy, use caution. Stop playing if you experience dizziness, eye discomfort, or other symptoms, and take regular breaks.</p>
+
+          <h3>Contact</h3>
+          <p><strong>Created by:</strong> Kamal Ahmed<br>
+          <strong>Email:</strong> <a href="mailto:kamalahmed1984@gmail.com">kamalahmed1984@gmail.com</a><br>
+          <strong>Facebook:</strong> <a href="https://www.facebook.com/kamalmostakin" target="_blank" rel="noopener">https://www.facebook.com/kamalmostakin</a><br>
+          <strong>Portfolio:</strong> <a href="https://github.com/kamal-core/" target="_blank" rel="noopener">https://github.com/kamal-core/</a></p>
+        </section>
+
+        <div class="disclaimer-copyright">
+          © 2026 Kamal Ahmed. All rights reserved.
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Game Over Screen -->
+  <!-- BREAKING NEWS TABLOID & HOSPITAL BED GAME OVER SCREEN -->
   <div id="game-over-modal" class="screen-overlay hidden">
-    <div class="menu-modal game-over-box">
-      <div class="police-siren">🚨 💥 🚨</div>
-      <h1 class="game-over-title">খেলা শেষ!</h1>
+    <div class="menu-modal game-over-box breaking-news-box">
+      <!-- Tabloid Newspaper Header -->
+      <div class="tabloid-header">
+        <div class="news-top-strip">
+          <span class="live-dot">●</span>
+          <span>দৈনিক ঢাকার খবর • বিশেষ বুলেটিন</span>
+          <span class="edition-tag">বিশেষ সান্ধ্য সংস্করণ</span>
+        </div>
+        <div class="breaking-banner">
+          <span class="flash-tag">🔴 ব্রেকিং নিউজ</span>
+          <h2 id="go-headline" class="breaking-headline">বড় বাসের ছাদে রিকশার শুভ মহরত!</h2>
+        </div>
+      </div>
+
+      <!-- Procedural Hospital Bed Illustration Canvas -->
+      <div class="hospital-scene-wrap">
+        <canvas id="hospital-canvas" width="460" height="190" class="hospital-canvas"></canvas>
+      </div>
+
       <p id="game-over-reason" class="game-over-reason">লোকাল বাসের সাথে সংঘর্ষে আপনার টমটম দুমড়ে-মুচড়ে গেছে!</p>
 
       <div class="stats-panel">
